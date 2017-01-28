@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>20 постов</title>
+</head>
+<body>
+<ul id="message_list">
+    {% for message in messages %}
+    <li>{{ message.pk }} {{ message.text }}</li>
+    {% endfor %}
+</ul>
+
+<form id="messageForm" method="post">
+    <input type="text" id="message" name="message"/>
+    <label for="message">Сообщение</label>
+    <input type="submit">
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+    let messages = [];
+
+    $(document).ready(function () {
+        $('#messageForm').submit(function (e) {
+            e.preventDefault();
+            const msg = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                data: msg,
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (res) {
+                    console.log('Возникла ошибка: ' + res);
+                }
+            });
+        });
+
+        function poll() {
+            $.ajax({
+                url: `/long_poll/?last_pk=${messages.length ? messages[messages.length - 1].pk : ''}`,
+                dataType: "json",
+                timeout: 30000,
+                complete: poll,
+                success: function (data) {
+                    messages = data.result;
+                    let message_list_li = '';
+                    for (let message of messages) {
+                        message_list_li += `<li>${message.text}</li>`
+                    }
+                    $('#message_list').html(message_list_li);
+                    console.log(data);
+                },
+                error: function (res) {
+                    console.log('Возникла ошибка: ' + res);
+                }
+            });
+        }
+
+        poll()
+    });
+</script>
+</body>
+</html>
