@@ -2,8 +2,8 @@ import asyncio
 import concurrent.futures
 import sys
 
-import aiohttp_jinja2
 import asyncio_redis
+import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPBadRequest
